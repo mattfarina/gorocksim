@@ -1,8 +1,8 @@
 package models
 
 import (
-	"fmt"
 	"encoding/xml"
+	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -12,38 +12,38 @@ type RSEParser struct {
 }
 
 func check(e error) {
-    if e != nil {
-        panic(e)
-    }
+	if e != nil {
+		panic(e)
+	}
 }
 
 type EngineDatabase struct {
-	XMLName xml.Name `xml:"engine-database"`
+	XMLName  xml.Name   `xml:"engine-database"`
 	Database EngineList `xml:"engine-list"`
 }
 
 type EngineList struct {
-	XMLName xml.Name `xml:"engine-list"`
+	XMLName xml.Name    `xml:"engine-list"`
 	Engines []RSEEngine `xml:"engine"`
 }
 
 type RSEEngine struct {
-	Comments string `xml:"comments"`
-	Code  string `xml:"code,attr"`
-	Diameter float64 `xml:"dia,attr"`
-	Length float64 `xml:"len,attr"`
-	Delay string `xml:"delays,attr"`
-	PropellantWeight float64 `xml:"propWt,attr"`
-	EngineWeight float64 `xml:"initWt,attr"`
-	Manufacturer string `xml:"mfg,:attr"`
-	BurnTime float64 `xml:"burn-time,attr"`
-	Data []RSEDataPoint `xml:"data>eng-data"`
+	Comments         string         `xml:"comments"`
+	Code             string         `xml:"code,attr"`
+	Diameter         float64        `xml:"dia,attr"`
+	Length           float64        `xml:"len,attr"`
+	Delay            string         `xml:"delays,attr"`
+	PropellantWeight float64        `xml:"propWt,attr"`
+	EngineWeight     float64        `xml:"initWt,attr"`
+	Manufacturer     string         `xml:"mfg,:attr"`
+	BurnTime         float64        `xml:"burn-time,attr"`
+	Data             []RSEDataPoint `xml:"data>eng-data"`
 }
 
 type RSEDataPoint struct {
 	TimeStamp float64 `xml:"t,attr"`
-	Force float64 `xml:"f,attr"`
-	Mass float64 `xml:"m,attr"`
+	Force     float64 `xml:"f,attr"`
+	Mass      float64 `xml:"m,attr"`
 }
 
 // <engine-database>
@@ -87,9 +87,9 @@ type RSEDataPoint struct {
 //  </engine-list>
 // </engine-database>
 
-func (r RSEParser) parse(filename string) *Parser{
+func (r RSEParser) Parse(filename string) Parser {
 	var home string = os.Getenv("HOME")
-	var engines string = home+"/.gorocksim/engines/"+filename
+	var engines string = home + "/.gorocksim/engines/" + filename
 	if _, err := os.Stat(engines); os.IsNotExist(err) {
 		panic(err)
 	}
@@ -101,7 +101,7 @@ func (r RSEParser) parse(filename string) *Parser{
 
 	engine_info, err := ioutil.ReadAll(xmlFile)
 	check(err)
-	
+
 	var engineDB EngineDatabase
 	err = xml.Unmarshal(engine_info, &engineDB)
 	if err != nil {
@@ -117,20 +117,17 @@ func (r RSEParser) parse(filename string) *Parser{
 	r.Context.Manufacturer = the_engine.Manufacturer
 	r.Context.BurnTime = the_engine.BurnTime
 	r.Context.Data = the_engine.Data
-    
-	return &r.Context
+
+	return r.Context
 }
 
-func (r RSEParser) setContext(parent EngineParser)  {
+func (r RSEParser) setContext(parent EngineParser) {
 	r.Context = parent
 }
-
 
 func (r RSEParser) force_value_at(time float64) float64 {
 	return 0.0
 }
-
-
 
 // doc = File.open(context.filename) { |f| Nokogiri::XML(f) }
 // context.code = doc.xpath('string(//engine/@code)')
